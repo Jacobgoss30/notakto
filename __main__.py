@@ -1,6 +1,9 @@
-import pygame
-import os
+"""2 Player noughts and crosses"""
 import sys
+import os.path
+import pygame
+
+ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
 
 pygame.init()
 
@@ -14,18 +17,18 @@ pygame.display.set_caption(wnTitle)
 
 boxSize = 100
 
-blueMouse = pygame.image.load("assets/BlueMouse.png")
-redMouse = pygame.image.load("assets/RedMouse.png")
+blueMouse = pygame.image.load(ASSET_PATH + "BlueMouse.png")
+redMouse = pygame.image.load(ASSET_PATH + "RedMouse.png")
 pygame.mouse.set_visible(False)
 
 startBoxColor = (240, 240, 240)
 red = (239, 57, 57)
 blue = (46, 121, 232)
 
-redWon = pygame.image.load("assets/RedWon.png")
-blueWon = pygame.image.load("assets/BlueWon.png")
-drawImg = pygame.image.load("assets/Draw.png")
-endImg = pygame.image.load("assets/ClickToContinue.png")
+redWon = pygame.image.load(ASSET_PATH + "RedWon.png")
+blueWon = pygame.image.load(ASSET_PATH + "BlueWon.png")
+drawImg = pygame.image.load(ASSET_PATH + "Draw.png")
+endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
 
 while True:
     turn = "r"
