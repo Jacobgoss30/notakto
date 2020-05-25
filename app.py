@@ -8,8 +8,10 @@ pygame.init()
 
 ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
 
-WIN_WIDTH = 500
-WIN_HEIGHT = 430
+WIN_WIDTH = 490
+WIN_HEIGHT = 490
+BOX_SIZE = 150
+OFFSET = 10
 WIN_COLOUR = (30, 30, 30)
 TITLE = "Noughts and Crosses"
 
@@ -30,36 +32,27 @@ drawImg = pygame.image.load(ASSET_PATH + "Draw.png")
 endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
 
 class GridBox:
-    def __init__(self, pos, expand, color, data, vert, hor):
-        self.color = color
-        self.rect = (pos[0], pos[1], expand, expand)
+    def __init__(self, pos, size, data, index):
+        self.rect = (pos[0], pos[1], size, size)
         self.data = data
-        self.vert = vert
-        self.hor = hor
+        self.index = index
 
     def draw(self):
         if self.data == "r":
-            self.color = red
+            colour = red
         elif self.data == "b":
-            self.color = blue
+            colour = blue
         else:
-            self.color = startBoxColor
+            colour = startBoxColor
 
-        pygame.draw.rect(wn, self.color, self.rect)
+        pygame.draw.rect(wn, colour, self.rect)
 
     def touching_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         return pygame.Rect(self.rect).collidepoint(mouse_pos[0], mouse_pos[1])
 
-def add_row(y, color, grid_index):
-    global grid
 
-    grid.append(GridBox((85, y), 100, color, "d", grid_index, 0))
-    grid.append(GridBox((195, y), 100, color, "d", grid_index, 1))
-    grid.append(GridBox((305, y), 100, color, "d", grid_index, 2))
-
-def render_screen():
-    global grid, box, blueMouse, redMouse, turn
+def render_screen(grid, turn):
     wn.fill(WIN_COLOUR)
 
     for box in grid:
@@ -122,25 +115,24 @@ def check_winner(data):
                 # blue has gotten top right to bottom left
                 return "b"
 
+    if not any("d" in x for x in data):
+        return "draw"
 
 def initialise_match():
     """Initialises the playing grid data and visual grid"""
-    return
-
-while True:
-    turn = "r"
     gridData = [["d", "d", "d"],
                 ["d", "d", "d"],
                 ["d", "d", "d"]]
     grid = []
-    run = True
+    for j in range(3):
+        y = BOX_SIZE * j + OFFSET * (j + 1)
+        for i in range(3):
+            x = BOX_SIZE * i + OFFSET * (i + 1)
+            grid.append(GridBox((x, y), BOX_SIZE, "d", (i, j)))
+    return grid, gridData
 
-
-    add_row(50, startBoxColor, 0)
-    add_row(160, startBoxColor, 1)
-    add_row(270, startBoxColor, 2)
-
-    while run:
+def play(turn, grid, gridData):
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -150,17 +142,21 @@ while True:
                         box.touching_mouse()):
                     if box.data == "d":
                         box.data = turn
-                        gridData[box.vert][box.hor] = turn
+                        gridData[box.index[0]][box.index[1]] = turn
                         turn = "b" if turn == "r" else "r"
 
-        if check_winner(gridData) == "r":
-            run = False
-        if check_winner(gridData) == "b":
-            run = False
-        if not any("d" in x for x in gridData):
-            run = False
+        outcome = check_winner(gridData)
+        if outcome is not None:
+            break
+        render_screen(grid, turn)
 
-        render_screen()
+    return outcome
+
+while True:
+    turn = "r"
+
+    grid, gridData = initialise_match()
+    outcome = play(turn, grid, gridData)
 
     pressed = False
     tick = 0
@@ -175,11 +171,11 @@ while True:
 
         wn.fill(WIN_COLOUR)
 
-        if check_winner(gridData) == "r":
+        if outcome  == "r":
             # RED HAS WON!
             wn.blit(redWon, (WIN_WIDTH / 2 - redWon.get_width() / 2,
                              WIN_HEIGHT / 2 - redWon.get_height() / 2))
-        elif check_winner(gridData) == "b":
+        elif outcome == "b":
             # BLUE HAS WON!
             wn.blit(blueWon, (WIN_WIDTH / 2 - blueWon.get_width() / 2,
                               WIN_HEIGHT / 2 - blueWon.get_height() / 2))
@@ -192,7 +188,7 @@ while True:
             wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
 
         mousePos = pygame.mouse.get_pos()
-        wn.blit(blueMouse if check_winner(gridData) == "b" else redMouse,
+        wn.blit(blueMouse if outcome == "b" else redMouse,
                 (mousePos[0], mousePos[1]))
 
         pygame.display.update()
