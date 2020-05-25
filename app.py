@@ -18,8 +18,6 @@ TITLE = "Noughts and Crosses"
 wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption(TITLE)
 
-blueMouse = pygame.image.load(ASSET_PATH + "BlueMouse.png")
-redMouse = pygame.image.load(ASSET_PATH + "RedMouse.png")
 pygame.mouse.set_visible(False)
 
 startBoxColor = (240, 240, 240)
@@ -32,6 +30,11 @@ images = {
     "r": pygame.image.load(ASSET_PATH + "RedWon.png"),
     "b": pygame.image.load(ASSET_PATH + "BlueWon.png"),
     "draw": pygame.image.load(ASSET_PATH + "Draw.png")
+}
+
+mice = {
+    "r": pygame.image.load(ASSET_PATH + "RedMouse.png"),
+    "b": pygame.image.load(ASSET_PATH + "BlueMouse.png")
 }
 
 class GridBox:
@@ -61,61 +64,45 @@ def render_screen(grid, turn):
     for box in grid:
         box.draw()
 
-    wn.blit(
-        redMouse if turn is "r" else blueMouse, (pygame.mouse.get_pos()[0],
-                                                 pygame.mouse.get_pos()[1]))
-
+    wn.blit(mice[turn], (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
     pygame.display.update()
 
 
 def check_winner(data):
     for row in data:
         if row == ["r", "r", "r"]:
-            # red got three horizontal at any row
             return "r"
         if row == ["b", "b", "b"]:
-            # blue got three horizontal at any row
             return "b"
 
     for i in range(3):
         if data[0][i] == "r":
             if data[1][i] == "r":
-                # middle column is occupies by red
                 if data[2][i] == "r":
-                    # right column is occupies by red
                     return "r"
 
-        # -------------------------------------------
         if data[0][i] == "b":
-            # left column is occupied by blue
             if data[1][i] == "b":
-                # middle column is occupied by blue
                 if data[2][i] == "b":
-                    # right column is occupied by blue
                     return "b"
 
-    # -----------------------------------------------
     if data[0][0] == "r":
         if data[1][1] == "r":
             if data[2][2] == "r":
-                # red has gotten top left to bottom right
                 return "r"
     if data[0][2] == "r":
         if data[1][1] == "r":
             if data[2][0] == "r":
-                # red has gotten top right to bottom left
                 return "r"
 
-    # ------------------------------------------------
     if data[0][0] == "b":
         if data[1][1] == "b":
             if data[2][2] == "b":
-                # blue has gotten top left to bottom right
                 return "b"
+
     if data[0][2] == "b":
         if data[1][1] == "b":
             if data[2][0] == "b":
-                # blue has gotten top right to bottom left
                 return "b"
 
     if not any("d" in x for x in data):
@@ -123,18 +110,18 @@ def check_winner(data):
 
 def initialise_match():
     """Initialises the playing grid data and visual grid"""
-    gridData = [["d", "d", "d"],
-                ["d", "d", "d"],
-                ["d", "d", "d"]]
+    grid_data = [["d", "d", "d"],
+                 ["d", "d", "d"],
+                 ["d", "d", "d"]]
     grid = []
     for j in range(3):
-        y = BOX_SIZE * j + OFFSET * (j + 1)
+        y_coord = BOX_SIZE * j + OFFSET * (j + 1)
         for i in range(3):
-            x = BOX_SIZE * i + OFFSET * (i + 1)
-            grid.append(GridBox((x, y), BOX_SIZE, "d", (i, j)))
-    return grid, gridData
+            x_coord = BOX_SIZE * i + OFFSET * (i + 1)
+            grid.append(GridBox((x_coord, y_coord), BOX_SIZE, "d", (i, j)))
+    return grid, grid_data
 
-def play(turn, grid, gridData):
+def play(turn, grid, grid_data):
     """Plays a match and returns outcome"""
     while True:
         for event in pygame.event.get():
@@ -146,10 +133,10 @@ def play(turn, grid, gridData):
                         box.touching_mouse()):
                     if box.data == "d":
                         box.data = turn
-                        gridData[box.index[0]][box.index[1]] = turn
+                        grid_data[box.index[0]][box.index[1]] = turn
                         turn = "b" if turn == "r" else "r"
 
-        outcome = check_winner(gridData)
+        outcome = check_winner(grid_data)
         if outcome is not None:
             break
         render_screen(grid, turn)
@@ -158,35 +145,32 @@ def play(turn, grid, gridData):
 
 def end_match(outcome):
     """Prints winner to screen"""
-    pressed = False
-    tick = 0
-    while not pressed:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if tick > 60:
-                    pressed = True
+                return
 
         wn.fill(WIN_COLOUR)
+
         img = images[outcome]
         wn.blit(img, (WIN_WIDTH / 2 - img.get_width() / 2,
                       WIN_HEIGHT / 2 - img.get_height() / 2))
 
-        if tick > 60:
-            wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
-        mousePos = pygame.mouse.get_pos()
-        wn.blit(blueMouse if outcome == "b" else redMouse,
-                (mousePos[0], mousePos[1]))
+        wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
+        mouse_pos = pygame.mouse.get_pos()
+        wn.blit(mice[outcome], (mouse_pos[0], mouse_pos[1]))
 
         pygame.display.update()
 
-        tick += 1
+def run():
+    """runs the game"""
+    while True:
+        turn = "r"
+        grid, grid_data = initialise_match()
+        outcome = play(turn, grid, grid_data)
+        end_match(outcome)
 
-
-while True:
-    turn = "r"
-
-    grid, gridData = initialise_match()
-    outcome = play(turn, grid, gridData)
-    end_match(outcome)
+if __name__ == '__main__':
+    run()
