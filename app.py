@@ -26,10 +26,13 @@ startBoxColor = (240, 240, 240)
 red = (239, 57, 57)
 blue = (46, 121, 232)
 
-redWon = pygame.image.load(ASSET_PATH + "RedWon.png")
-blueWon = pygame.image.load(ASSET_PATH + "BlueWon.png")
-drawImg = pygame.image.load(ASSET_PATH + "Draw.png")
 endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
+
+images = {
+    "r": pygame.image.load(ASSET_PATH + "RedWon.png"),
+    "b": pygame.image.load(ASSET_PATH + "BlueWon.png"),
+    "draw": pygame.image.load(ASSET_PATH + "Draw.png")
+}
 
 class GridBox:
     def __init__(self, pos, size, data, index):
@@ -132,6 +135,7 @@ def initialise_match():
     return grid, gridData
 
 def play(turn, grid, gridData):
+    """Plays a match and returns outcome"""
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -152,15 +156,10 @@ def play(turn, grid, gridData):
 
     return outcome
 
-while True:
-    turn = "r"
-
-    grid, gridData = initialise_match()
-    outcome = play(turn, grid, gridData)
-
+def end_match(outcome):
+    """Prints winner to screen"""
     pressed = False
     tick = 0
-
     while not pressed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -170,23 +169,12 @@ while True:
                     pressed = True
 
         wn.fill(WIN_COLOUR)
-
-        if outcome  == "r":
-            # RED HAS WON!
-            wn.blit(redWon, (WIN_WIDTH / 2 - redWon.get_width() / 2,
-                             WIN_HEIGHT / 2 - redWon.get_height() / 2))
-        elif outcome == "b":
-            # BLUE HAS WON!
-            wn.blit(blueWon, (WIN_WIDTH / 2 - blueWon.get_width() / 2,
-                              WIN_HEIGHT / 2 - blueWon.get_height() / 2))
-        else:
-            # DRAW!
-            wn.blit(drawImg, (WIN_WIDTH / 2 - drawImg.get_width() / 2,
-                              WIN_HEIGHT / 2 - drawImg.get_height() / 2))
+        img = images[outcome]
+        wn.blit(img, (WIN_WIDTH / 2 - img.get_width() / 2,
+                      WIN_HEIGHT / 2 - img.get_height() / 2))
 
         if tick > 60:
             wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
-
         mousePos = pygame.mouse.get_pos()
         wn.blit(blueMouse if outcome == "b" else redMouse,
                 (mousePos[0], mousePos[1]))
@@ -194,3 +182,11 @@ while True:
         pygame.display.update()
 
         tick += 1
+
+
+while True:
+    turn = "r"
+
+    grid, gridData = initialise_match()
+    outcome = play(turn, grid, gridData)
+    end_match(outcome)
