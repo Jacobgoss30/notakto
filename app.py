@@ -156,17 +156,10 @@ while True:
                         turn = "b" if turn == "r" else "r"
 
         if check_winner(gridData) == "r":
-            # red has won
             run = False
         if check_winner(gridData) == "b":
-            # blue has won
             run = False
-
-        inList = True if ("d" in gridData[0] or
-                          "d" in gridData[1] or
-                          "d" in gridData[2]) else False
-
-        if not inList:
+        if not any("d" in x for x in gridData):
             run = False
 
         render_screen()
