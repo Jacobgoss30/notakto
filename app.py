@@ -122,15 +122,16 @@ def check_winner(data):
                 # blue has gotten top right to bottom left
                 return "b"
 
+
+def initialise_match():
+    """Initialises the playing grid data and visual grid"""
+    return
+
 while True:
     turn = "r"
-
     gridData = [["d", "d", "d"],
                 ["d", "d", "d"],
                 ["d", "d", "d"]]
-
-    wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    pygame.display.set_caption(TITLE)
     grid = []
     run = True
 
@@ -144,13 +145,10 @@ while True:
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            # checking if a box is clicked
             for box in grid:
                 if (event.type == pygame.MOUSEBUTTONDOWN and
                         box.touching_mouse()):
-                    # a box is pressed
                     if box.data == "d":
-                        # no side has occupied the box
                         box.data = turn
                         gridData[box.vert][box.hor] = turn
                         turn = "b" if turn == "r" else "r"
