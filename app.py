@@ -15,14 +15,14 @@ OFFSET = 10
 WIN_COLOUR = (30, 30, 30)
 TITLE = "Noughts and Crosses"
 
-wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption(TITLE)
-
-pygame.mouse.set_visible(False)
-
 startBoxColor = (240, 240, 240)
 red = (239, 57, 57)
 blue = (46, 121, 232)
+
+wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+pygame.display.set_caption(TITLE)
+pygame.mouse.set_visible(False)
+
 
 endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
 
