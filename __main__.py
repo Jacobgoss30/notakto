@@ -7,15 +7,15 @@ ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
 
 pygame.init()
 
-wnWidth = 500
-wnHeight = 430
-wnColor = (30, 30, 30)
-wnTitle = "Tic-Tac-Toe"
+WIN_WIDTH = 500
+WIN_HEIGHT = 430
+WIN_COLOUR = (30, 30, 30)
+TITLE = "Noughts and Crosses"
 
-wn = pygame.display.set_mode((wnWidth, wnHeight))
-pygame.display.set_caption(wnTitle)
+wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+pygame.display.set_caption(TITLE)
 
-boxSize = 100
+BOX_SIZE = 100
 
 blueMouse = pygame.image.load(ASSET_PATH + "BlueMouse.png")
 redMouse = pygame.image.load(ASSET_PATH + "RedMouse.png")
@@ -37,11 +37,10 @@ while True:
                 ["d", "d", "d"],
                 ["d", "d", "d"]]
 
-    wn = pygame.display.set_mode((wnWidth, wnHeight))
-    pygame.display.set_caption(wnTitle)
+    wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    pygame.display.set_caption(TITLE)
     grid = []
     run = True
-
     """
     Red vs Blue
     Tic-Tac-Toe
@@ -86,7 +85,7 @@ while True:
 
     def render_screen():
         global grid, box, blueMouse, redMouse, turn
-        wn.fill(wnColor)
+        wn.fill(WIN_COLOUR)
 
         for box in grid:
             box.draw()
@@ -189,20 +188,20 @@ while True:
                 if tick > 60:
                     pressed = True
 
-        wn.fill(wnColor)
+        wn.fill(WIN_COLOUR)
 
         if check_winner(gridData) == "r":
             # RED HAS WON!
-            wn.blit(redWon, (wnWidth / 2 - redWon.get_width() / 2, wnHeight / 2 - redWon.get_height() / 2))
+            wn.blit(redWon, (WIN_WIDTH / 2 - redWon.get_width() / 2, WIN_HEIGHT / 2 - redWon.get_height() / 2))
         elif check_winner(gridData) == "b":
             # BLUE HAS WON!
-            wn.blit(blueWon, (wnWidth / 2 - blueWon.get_width() / 2, wnHeight / 2 - blueWon.get_height() / 2))
+            wn.blit(blueWon, (WIN_WIDTH / 2 - blueWon.get_width() / 2, WIN_HEIGHT / 2 - blueWon.get_height() / 2))
         else:
             # DRAW!
-            wn.blit(drawImg, (wnWidth / 2 - drawImg.get_width() / 2, wnHeight / 2 - drawImg.get_height() / 2))
+            wn.blit(drawImg, (WIN_WIDTH / 2 - drawImg.get_width() / 2, WIN_HEIGHT / 2 - drawImg.get_height() / 2))
 
         if tick > 60:
-            wn.blit(endImg, (wnWidth / 2 - endImg.get_width() / 2, 350))
+            wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
 
         mousePos = pygame.mouse.get_pos()
         wn.blit(blueMouse if check_winner(gridData) == "b" else redMouse, (mousePos[0], mousePos[1]))
