@@ -29,7 +29,6 @@ endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
 images = {
     "r": pygame.image.load(ASSET_PATH + "RedWon.png"),
     "b": pygame.image.load(ASSET_PATH + "BlueWon.png"),
-    "draw": pygame.image.load(ASSET_PATH + "Draw.png")
 }
 
 mice = {
