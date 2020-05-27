@@ -1,6 +1,7 @@
 """Notakto vs Computer"""
 import sys
 import os.path
+from time import sleep
 import numpy as np
 import pygame
 
@@ -53,7 +54,6 @@ class GridBox:
         mouse_pos = pygame.mouse.get_pos()
         return pygame.Rect(self.rect).collidepoint(mouse_pos[0], mouse_pos[1])
 
-
 def render_screen(grid, turn):
     wn.fill(WIN_COLOUR)
 
@@ -62,7 +62,6 @@ def render_screen(grid, turn):
 
     wn.blit(mice[turn], (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
     pygame.display.update()
-
 
 def check_dead(grid):
     """Checks if the grid is dead"""
@@ -93,18 +92,34 @@ def play(turn, grid, grid_data):
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            for box in grid:
-                if (event.type == pygame.MOUSEBUTTONDOWN and
-                        box.touching_mouse()):
-                    if not box.filled:
+            if turn == 'r':
+                for box in grid:
+                    if (event.type == pygame.MOUSEBUTTONDOWN and
+                            box.touching_mouse() and
+                            not box.filled):
                         box.filled = True
-                        grid_data[box.index[0], box.index[1]] = True
-                        turn = "b" if turn == "r" else "r"
+                        grid_data[box.index] = True
+                        turn = "b"
+            else:
+                grid, grid_data = cpu_turn(grid, grid_data)
+                turn = "r"
 
         render_screen(grid, turn)
 
         if check_dead(grid_data):
             return turn
+
+def cpu_turn(grid, grid_data):
+    """Plays the cpu turn and returns updated grid and grid data"""
+    sleep(0.1)
+    emptys = np.where(~grid_data)
+    ind = np.random.randint(len(emptys))
+    coords = (emptys[0][ind], emptys[1][ind])
+    grid_data[coords] = True
+    for box in grid:
+        if box.index == coords:
+            box.filled = True
+    return grid, grid_data
 
 def end_match(winner):
     """Prints winner to screen"""
