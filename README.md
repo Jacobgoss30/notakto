@@ -1,2 +1,2 @@
 # noughty
-Simple noughts and crosses game
+Notakto vs Computer

@@ -1,6 +1,8 @@
-"""2 Player noughts and crosses"""
+"""Notakto vs Computer"""
 import sys
 import os.path
+from time import sleep
+import numpy as np
 import pygame
 
 
@@ -9,15 +11,14 @@ pygame.init()
 ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
 
 WIN_WIDTH = 490
-WIN_HEIGHT = 490
+WIN_HEIGHT = 590
 BOX_SIZE = 150
 OFFSET = 10
 WIN_COLOUR = (30, 30, 30)
-TITLE = "Noughts and Crosses"
+TITLE = "Notakto"
 
-startBoxColor = (240, 240, 240)
+empty = (240, 240, 240)
 red = (239, 57, 57)
-blue = (46, 121, 232)
 
 wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption(TITLE)
@@ -29,7 +30,6 @@ endImg = pygame.image.load(ASSET_PATH + "ClickToContinue.png")
 images = {
     "r": pygame.image.load(ASSET_PATH + "RedWon.png"),
     "b": pygame.image.load(ASSET_PATH + "BlueWon.png"),
-    "draw": pygame.image.load(ASSET_PATH + "Draw.png")
 }
 
 mice = {
@@ -38,25 +38,21 @@ mice = {
 }
 
 class GridBox:
-    def __init__(self, pos, size, data, index):
-        self.rect = (pos[0], pos[1], size, size)
-        self.data = data
+    def __init__(self, position, size, filled, index):
+        self.rect = (position[0], position[1], size, size)
+        self.filled = filled
         self.index = index
 
     def draw(self):
-        if self.data == "r":
+        if self.filled:
             colour = red
-        elif self.data == "b":
-            colour = blue
         else:
-            colour = startBoxColor
-
+            colour = empty
         pygame.draw.rect(wn, colour, self.rect)
 
     def touching_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         return pygame.Rect(self.rect).collidepoint(mouse_pos[0], mouse_pos[1])
-
 
 def render_screen(grid, turn):
     wn.fill(WIN_COLOUR)
@@ -67,58 +63,26 @@ def render_screen(grid, turn):
     wn.blit(mice[turn], (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
     pygame.display.update()
 
-
-def check_winner(data):
-    for row in data:
-        if row == ["r", "r", "r"]:
-            return "r"
-        if row == ["b", "b", "b"]:
-            return "b"
-
+def check_dead(grid):
+    """Checks if the grid is dead"""
     for i in range(3):
-        if data[0][i] == "r":
-            if data[1][i] == "r":
-                if data[2][i] == "r":
-                    return "r"
-
-        if data[0][i] == "b":
-            if data[1][i] == "b":
-                if data[2][i] == "b":
-                    return "b"
-
-    if data[0][0] == "r":
-        if data[1][1] == "r":
-            if data[2][2] == "r":
-                return "r"
-    if data[0][2] == "r":
-        if data[1][1] == "r":
-            if data[2][0] == "r":
-                return "r"
-
-    if data[0][0] == "b":
-        if data[1][1] == "b":
-            if data[2][2] == "b":
-                return "b"
-
-    if data[0][2] == "b":
-        if data[1][1] == "b":
-            if data[2][0] == "b":
-                return "b"
-
-    if not any("d" in x for x in data):
-        return "draw"
+        if sum(grid[:, i]) == 3: # Check columns
+            return True
+        if sum(grid[i, :]) == 3: # Check rows
+            return True
+    if (np.trace(grid) == 3 or np.trace(np.fliplr(grid)) == 3): # Check diags
+        return True
+    return False
 
 def initialise_match():
     """Initialises the playing grid data and visual grid"""
-    grid_data = [["d", "d", "d"],
-                 ["d", "d", "d"],
-                 ["d", "d", "d"]]
+    grid_data = np.zeros((3, 3)).astype(bool)
     grid = []
     for j in range(3):
         y_coord = BOX_SIZE * j + OFFSET * (j + 1)
         for i in range(3):
             x_coord = BOX_SIZE * i + OFFSET * (i + 1)
-            grid.append(GridBox((x_coord, y_coord), BOX_SIZE, "d", (i, j)))
+            grid.append(GridBox((x_coord, y_coord), BOX_SIZE, False, (i, j)))
     return grid, grid_data
 
 def play(turn, grid, grid_data):
@@ -128,22 +92,37 @@ def play(turn, grid, grid_data):
             if event.type == pygame.QUIT:
                 sys.exit()
 
-            for box in grid:
-                if (event.type == pygame.MOUSEBUTTONDOWN and
-                        box.touching_mouse()):
-                    if box.data == "d":
-                        box.data = turn
-                        grid_data[box.index[0]][box.index[1]] = turn
-                        turn = "b" if turn == "r" else "r"
+            if turn == 'r':
+                for box in grid:
+                    if (event.type == pygame.MOUSEBUTTONDOWN and
+                            box.touching_mouse() and
+                            not box.filled):
+                        box.filled = True
+                        grid_data[box.index] = True
+                        turn = "b"
+            else:
+                grid, grid_data = cpu_turn(grid, grid_data)
+                turn = "r"
 
-        outcome = check_winner(grid_data)
-        if outcome is not None:
-            break
         render_screen(grid, turn)
 
-    return outcome
+        if check_dead(grid_data):
+            sleep(0.5)
+            return turn
 
-def end_match(outcome):
+def cpu_turn(grid, grid_data):
+    """Plays the cpu turn and returns updated grid and grid data"""
+    sleep(0.1)
+    emptys = np.where(~grid_data)
+    ind = np.random.randint(len(emptys))
+    coords = (emptys[0][ind], emptys[1][ind])
+    grid_data[coords] = True
+    for box in grid:
+        if box.index == coords:
+            box.filled = True
+    return grid, grid_data
+
+def end_match(winner):
     """Prints winner to screen"""
     while True:
         for event in pygame.event.get():
@@ -154,13 +133,13 @@ def end_match(outcome):
 
         wn.fill(WIN_COLOUR)
 
-        img = images[outcome]
+        img = images[winner]
         wn.blit(img, (WIN_WIDTH / 2 - img.get_width() / 2,
                       WIN_HEIGHT / 2 - img.get_height() / 2))
 
         wn.blit(endImg, (WIN_WIDTH / 2 - endImg.get_width() / 2, 350))
         mouse_pos = pygame.mouse.get_pos()
-        wn.blit(mice[outcome], (mouse_pos[0], mouse_pos[1]))
+        wn.blit(mice[winner], (mouse_pos[0], mouse_pos[1]))
 
         pygame.display.update()
 
@@ -169,8 +148,8 @@ def run():
     while True:
         turn = "r"
         grid, grid_data = initialise_match()
-        outcome = play(turn, grid, grid_data)
-        end_match(outcome)
+        winner = play(turn, grid, grid_data)
+        end_match(winner)
 
 if __name__ == '__main__':
     run()
