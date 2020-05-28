@@ -20,6 +20,8 @@ TITLE = "Notakto"
 empty = (240, 240, 240)
 red = (239, 57, 57)
 
+font = pygame.font.Font(pygame.font.get_default_font(), 20)
+
 wn = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption(TITLE)
 pygame.mouse.set_visible(False)
@@ -38,12 +40,14 @@ mice = {
 }
 
 class GridBox:
+    """Class for grid boxes"""
     def __init__(self, position, size, filled, index):
         self.rect = (position[0], position[1], size, size)
         self.filled = filled
         self.index = index
 
     def draw(self):
+        """Draws grid box to screen"""
         if self.filled:
             colour = red
         else:
@@ -51,15 +55,18 @@ class GridBox:
         pygame.draw.rect(wn, colour, self.rect)
 
     def touching_mouse(self):
+        """Returns true if mouse is touching grid box"""
         mouse_pos = pygame.mouse.get_pos()
         return pygame.Rect(self.rect).collidepoint(mouse_pos[0], mouse_pos[1])
 
-def render_screen(grid, turn):
+def render_screen(grid, turn, scores):
+    """Blits the grid boxes and mouse to the screen"""
     wn.fill(WIN_COLOUR)
 
     for box in grid:
         box.draw()
 
+    blit_scores(scores)
     wn.blit(mice[turn], (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
     pygame.display.update()
 
@@ -85,7 +92,7 @@ def initialise_match():
             grid.append(GridBox((x_coord, y_coord), BOX_SIZE, False, (i, j)))
     return grid, grid_data
 
-def play(turn, grid, grid_data):
+def play(turn, grid, grid_data, scores):
     """Plays a match and returns outcome"""
     while True:
         for event in pygame.event.get():
@@ -104,7 +111,7 @@ def play(turn, grid, grid_data):
                 grid, grid_data = cpu_turn(grid, grid_data)
                 turn = "r"
 
-        render_screen(grid, turn)
+        render_screen(grid, turn, scores)
 
         if check_dead(grid_data):
             sleep(0.5)
@@ -143,13 +150,30 @@ def end_match(winner):
 
         pygame.display.update()
 
+def blit_scores(scores):
+    """Blits the scores to the bottom of the screen"""
+    textsurface = font.render(f'Player {scores[0]} - {scores[1]} CPU',
+                              True, (255, 255, 255))
+    wn.blit(textsurface, (10, 500))
+
+def update_scores(scores, winner):
+    """Updates the scores with the winner"""
+    if winner == 'r':
+        scores[0] += 1
+    else:
+        scores[1] += 1
+    return scores
+
 def run():
     """runs the game"""
+    scores = [0, 0]
+    turn = "r"
     while True:
-        turn = "r"
         grid, grid_data = initialise_match()
-        winner = play(turn, grid, grid_data)
+        winner = play(turn, grid, grid_data, scores)
         end_match(winner)
+        scores = update_scores(scores, winner)
+        turn = "b" if turn == "r" else "r"
 
 if __name__ == '__main__':
     run()
