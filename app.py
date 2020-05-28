@@ -11,7 +11,7 @@ pygame.init()
 ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
 
 WIN_WIDTH = 490
-WIN_HEIGHT = 490
+WIN_HEIGHT = 590
 BOX_SIZE = 150
 OFFSET = 10
 WIN_COLOUR = (30, 30, 30)
@@ -107,6 +107,7 @@ def play(turn, grid, grid_data):
         render_screen(grid, turn)
 
         if check_dead(grid_data):
+            sleep(0.5)
             return turn
 
 def cpu_turn(grid, grid_data):
