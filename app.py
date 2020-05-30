@@ -1,9 +1,11 @@
 """Notakto vs Computer"""
 import sys
 import os.path
-from time import sleep
+import pickle
 import numpy as np
 import pygame
+from utils import check_dead
+from cpu import cpu_turn
 
 
 pygame.init()
@@ -70,17 +72,6 @@ def render_screen(grid, turn, scores):
     wn.blit(mice[turn], (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
     pygame.display.update()
 
-def check_dead(grid):
-    """Checks if the grid is dead"""
-    for i in range(3):
-        if sum(grid[:, i]) == 3: # Check columns
-            return True
-        if sum(grid[i, :]) == 3: # Check rows
-            return True
-    if (np.trace(grid) == 3 or np.trace(np.fliplr(grid)) == 3): # Check diags
-        return True
-    return False
-
 def initialise_match():
     """Initialises the playing grid data and visual grid"""
     grid_data = np.zeros((3, 3)).astype(bool)
@@ -92,8 +83,9 @@ def initialise_match():
             grid.append(GridBox((x_coord, y_coord), BOX_SIZE, False, (i, j)))
     return grid, grid_data
 
-def play(turn, grid, grid_data, scores):
+def play(turn, grid, grid_data, scores, mdp):
     """Plays a match and returns outcome"""
+    turns = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -107,27 +99,16 @@ def play(turn, grid, grid_data, scores):
                         box.filled = True
                         grid_data[box.index] = True
                         turn = "b"
+                        turns += 1
             else:
-                grid, grid_data = cpu_turn(grid, grid_data)
+                grid, grid_data = cpu_turn(grid, grid_data, turns, mdp)
                 turn = "r"
+                turns += 1
 
         render_screen(grid, turn, scores)
 
         if check_dead(grid_data):
-            sleep(0.5)
             return turn
-
-def cpu_turn(grid, grid_data):
-    """Plays the cpu turn and returns updated grid and grid data"""
-    sleep(0.1)
-    emptys = np.where(~grid_data)
-    ind = np.random.randint(len(emptys))
-    coords = (emptys[0][ind], emptys[1][ind])
-    grid_data[coords] = True
-    for box in grid:
-        if box.index == coords:
-            box.filled = True
-    return grid, grid_data
 
 def end_match(winner):
     """Prints winner to screen"""
@@ -168,9 +149,11 @@ def run():
     """runs the game"""
     scores = [0, 0]
     turn = "r"
+    with open('data/mdp.pkl', 'rb') as mdp_fp:
+        mdp = pickle.load(mdp_fp)
     while True:
         grid, grid_data = initialise_match()
-        winner = play(turn, grid, grid_data, scores)
+        winner = play(turn, grid, grid_data, scores, mdp)
         end_match(winner)
         scores = update_scores(scores, winner)
         turn = "b" if turn == "r" else "r"
