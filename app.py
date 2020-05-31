@@ -5,7 +5,7 @@ import numpy as np
 import pygame
 from utils import check_dead
 from cpu import cpu_turn
-from mdp import load_mdp, save_mdp, update_info
+from mdp import load_mdp, save_mdp, update_data
 
 
 pygame.init()
@@ -159,9 +159,8 @@ def run():
     while True:
         grid, grid_data = initialise_match()
         winner = play(turn, grid, grid_data, scores)
-        save_mdp(mdp)
+        update_data(winner, turn, mdp)
         end_match(winner)
-        update_info(winner, mdp)
         scores = update_scores(scores, winner)
         turn = "b" if turn == "r" else "r"
 
