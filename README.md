@@ -9,8 +9,7 @@ Rules:
 
 Installation: 
 - git clone the repo
-- run pip install ./noughty
+- $pip install ./noughty
 
 Run:
-- Ensure you are in the /noughty directory
-
+- $python noughty
