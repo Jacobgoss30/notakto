@@ -9,7 +9,7 @@ Rules:
 
 Installation: 
 - git clone the repo
-- $pip install ./noughty
+- $pip install ./notakto
 
 Run:
-- $python noughty
+- $python notakto
