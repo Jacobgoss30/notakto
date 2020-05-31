@@ -1,15 +1,18 @@
 """Module for updating the mdp"""
 import pickle
+import os
+
+DATA_PATH = os.path.abspath(os.path.dirname(__file__)) + "/data/"
 
 def load_mdp():
     """Loads in the mdp from pickle"""
-    with open('data/mdp.pkl', 'rb') as mdp_fp:
+    with open(DATA_PATH + 'mdp.pkl', 'rb') as mdp_fp:
         mdp = pickle.load(mdp_fp)
     return mdp
 
 def save_mdp(mdp):
     """Saves the current mdp to pickle file"""
-    with open('data/mdp.pkl', 'wb') as mdp_fp:
+    with open(DATA_PATH + 'mdp.pkl', 'wb') as mdp_fp:
         pickle.dump(mdp, mdp_fp)
 
 def update_data(winner, turn, mdp):
@@ -20,17 +23,17 @@ def update_data(winner, turn, mdp):
 
 def update_general(winner, turn):
     """Updates the general.pkl file and returns True if mdp needs updating"""
-    with open('data/general.pkl', "rb") as file_path:
+    with open(DATA_PATH + 'general.pkl', "rb") as file_path:
         general = pickle.load(file_path)
     general['total_trials'] += 1
     general['rolling_trials'] += 1
     general['outcomes'] += [{turn: winner}]
     if general['rolling_trials'] == general['update_after']:
         general['rolling_trials'] = 0
-        with open('data/general.pkl', 'wb') as file_path:
+        with open(DATA_PATH + 'general.pkl', 'wb') as file_path:
             pickle.dump(general, file_path)
         return True
-    with open('data/general.pkl', 'wb') as file_path:
+    with open(DATA_PATH + 'general.pkl', 'wb') as file_path:
         pickle.dump(general, file_path)
     return False
 
