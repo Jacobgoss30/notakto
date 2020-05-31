@@ -1,11 +1,11 @@
 """Notakto vs Computer"""
 import sys
 import os.path
-import pickle
 import numpy as np
 import pygame
 from utils import check_dead
 from cpu import cpu_turn
+from mdp import load_mdp, save_mdp, update_data
 
 
 pygame.init()
@@ -40,6 +40,8 @@ mice = {
     "r": pygame.image.load(ASSET_PATH + "RedMouse.png"),
     "b": pygame.image.load(ASSET_PATH + "BlueMouse.png")
 }
+
+mdp = load_mdp()
 
 class GridBox:
     """Class for grid boxes"""
@@ -83,9 +85,13 @@ def initialise_match():
             grid.append(GridBox((x_coord, y_coord), BOX_SIZE, False, (i, j)))
     return grid, grid_data
 
-def play(turn, grid, grid_data, scores, mdp):
+def play(turn, grid, grid_data, scores):
     """Plays a match and returns outcome"""
-    turns = 0
+    play_info = {
+        'turns': 0,
+        'state_no': None,
+        'cpu_policy': None
+    }
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -99,11 +105,12 @@ def play(turn, grid, grid_data, scores, mdp):
                         box.filled = True
                         grid_data[box.index] = True
                         turn = "b"
-                        turns += 1
+                        play_info['turns'] += 1
             else:
-                grid, grid_data = cpu_turn(grid, grid_data, turns, mdp)
+                grid, grid_data, play_info = cpu_turn(grid, grid_data,
+                                                      play_info, mdp)
                 turn = "r"
-                turns += 1
+                play_info['turns'] += 1
 
         render_screen(grid, turn, scores)
 
@@ -149,11 +156,10 @@ def run():
     """runs the game"""
     scores = [0, 0]
     turn = "r"
-    with open('data/mdp.pkl', 'rb') as mdp_fp:
-        mdp = pickle.load(mdp_fp)
     while True:
         grid, grid_data = initialise_match()
-        winner = play(turn, grid, grid_data, scores, mdp)
+        winner = play(turn, grid, grid_data, scores)
+        update_data(winner, turn, mdp)
         end_match(winner)
         scores = update_scores(scores, winner)
         turn = "b" if turn == "r" else "r"
