@@ -1,4 +1,4 @@
-# noughty
+# Notakto
 Notakto vs Computer
 
 Play Notakto vs a Markov Decision Process
