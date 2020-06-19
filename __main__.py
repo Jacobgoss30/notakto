@@ -96,6 +96,7 @@ def play(turn, grid, grid_data, scores):
     }
     time_end = 0
     while True:
+        pygame.time.wait(1)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -110,12 +111,13 @@ def play(turn, grid, grid_data, scores):
                         turn = "c"
                         play_info['turns'] += 1
                 time_end = time.time() + 0.5
-            else:
-                if time.time() > time_end:
-                    grid, grid_data, play_info = cpu_turn(grid, grid_data,
-                                                          play_info, MDP)
-                    turn = "p"
-                    play_info['turns'] += 1
+
+        if turn == 'c':
+            if time.time() > time_end:
+                grid, grid_data, play_info = cpu_turn(grid, grid_data,
+                                                      play_info, MDP)
+                turn = "p"
+                play_info['turns'] += 1
 
         render_screen(grid, scores)
 
