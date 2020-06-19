@@ -49,7 +49,7 @@ class GridBox:
         mouse_pos = pygame.mouse.get_pos()
         return pygame.Rect(self.rect).collidepoint(mouse_pos[0], mouse_pos[1])
 
-def render_screen(grid, scores, winner=None):
+def render_screen(grid, scores, turn=None, winner=None):
     """Blits the grid boxes and mouse to the screen"""
     WINDOW.fill(WIN_COLOUR)
 
@@ -57,10 +57,12 @@ def render_screen(grid, scores, winner=None):
         box.draw()
 
     blit_scores(scores)
+    if winner is None:
+        blit_turn(turn)
+    else:
+        blit_winner(winner)
     WINDOW.blit(IMAGES['mouse'],
                 (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
-    if winner is not None:
-        blit_winner(winner)
     pygame.display.update()
 
 def blit_scores(scores):
@@ -68,6 +70,16 @@ def blit_scores(scores):
     textsurface = FONT.render(f'Player {scores[0]} - {scores[1]} CPU',
                               True, (255, 255, 255))
     WINDOW.blit(textsurface, (10, 700))
+
+def blit_turn(turn):
+    """Blits the current turn to the top of the screen"""
+    if turn == 'p':
+        text = 'Your Turn'
+    else:
+        text = 'CPU Turn'
+    textsurface = FONT.render(text, True, (255, 255, 255))
+    WINDOW.blit(textsurface, (10, 180))
+
 
 def blit_winner(winner):
     """Blits the winner image to screen"""
@@ -96,7 +108,7 @@ def play(turn, grid, grid_data, scores):
     }
     time_end = 0
     while True:
-        pygame.time.wait(1)
+        pygame.time.wait(5)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -119,7 +131,7 @@ def play(turn, grid, grid_data, scores):
                 turn = "p"
                 play_info['turns'] += 1
 
-        render_screen(grid, scores)
+        render_screen(grid, scores, turn=turn)
 
         if check_dead(grid_data):
             return turn, grid
@@ -132,7 +144,7 @@ def end_match(winner, grid, scores):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 return
-        render_screen(grid, scores, winner)
+        render_screen(grid, scores, winner=winner)
 
 def update_scores(scores, winner):
     """Updates the scores with the winner"""
