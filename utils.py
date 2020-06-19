@@ -1,5 +1,16 @@
-"""Utils for noughty"""
+"""Utils for notakto"""
+import os
+from pygame.image import load
 import numpy as np
+
+ASSET_PATH = os.path.abspath(os.path.dirname(__file__)) + "/assets/"
+
+IMAGES = {
+    "mouse": load(ASSET_PATH + "RedMouse.png"),
+    "continue": load(ASSET_PATH + "ClickToContinue.png"),
+    "p": load(ASSET_PATH + "YOUWON.png"),
+    "c": load(ASSET_PATH + "YOULOSE.png")
+}
 
 def check_dead(grid):
     """Checks if the grid is dead"""
